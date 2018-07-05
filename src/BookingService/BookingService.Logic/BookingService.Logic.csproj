@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BookingService.CustomerServiceApi\BookingService.CustomerServiceApi.csproj" />
+    <ProjectReference Include="..\BookingService.Infrastructure\BookingService.Infrastructure.csproj" />
+    <ProjectReference Include="..\BookingService.MessageQueue\BookingService.MessageQueue.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="CorrelationId">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Mapster">
+      <Version>3.1.8</Version>
+    </PackageReference>
+  </ItemGroup>
+</Project>
