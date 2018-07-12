@@ -15,9 +15,9 @@ namespace BookingService.Infrastructure.Repositories
             _context = context;
         }
         
-        public async Task<T> GetAsync(Expression<Func<T, bool>> predicate)
+        public async Task<T> GetAsync(long id)
         {
-            var model = await _context.FindAsync<T>(predicate);
+            var model = await _context.FindAsync<T>(id);
             return model;
         }
 

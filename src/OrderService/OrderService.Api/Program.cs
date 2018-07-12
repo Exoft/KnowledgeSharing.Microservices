@@ -14,6 +14,6 @@ namespace OrderService.Api
             WebHost.CreateDefaultBuilder(args)
                 .UseKestrel()
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5001");
+                .UseUrls("http://::5002");
     }
 }

@@ -1,4 +1,5 @@
-﻿using BookingService.Api.Extensions;
+﻿using System.IO;
+using BookingService.Api.Extensions;
 using BookingService.Api.Filters;
 using CorrelationId;
 using Microsoft.AspNetCore.Builder;
@@ -14,11 +15,17 @@ namespace BookingService.Api
 
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.local.json", optional:true)
+                .Build();
         }
         
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IConfiguration>(Configuration);
+            
             ConfigureExtensions(services);
             
             services.AddMvc(options => { options.Filters.Add<ApplicationExceptionFilter>(); });

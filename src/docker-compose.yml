@@ -1,0 +1,29 @@
+version: "3"
+services:    
+  customerservice:
+    build: CustomerService/
+    depends_on:
+      - rabbitmq
+      - postgres
+    ports:
+      - "5000:5000"
+  bookingservice:
+    build: BookingService/
+    depends_on:
+      - rabbitmq
+      - postgres
+    ports:
+      - "5001:5001"
+  orderservice:
+    build: OrderService/
+    depends_on:
+      - rabbitmq
+      - postgres
+    ports:
+      - "5002:5002"
+  postgres:
+    image: postgres
+    ports:
+      - "5432:5432"
+  rabbitmq:
+    image: rabbitmq

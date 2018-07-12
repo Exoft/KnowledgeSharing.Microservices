@@ -14,6 +14,6 @@ namespace BookingService.Api
             WebHost.CreateDefaultBuilder(args)
                 .UseKestrel()
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5004");
+                .UseUrls("http://::5001");
     }
 }

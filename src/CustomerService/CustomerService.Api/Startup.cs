@@ -1,4 +1,5 @@
-﻿using CorrelationId;
+﻿using System.IO;
+using CorrelationId;
 using CustomerService.Api.Extensions;
 using CustomerService.Api.Filters;
 using Microsoft.AspNetCore.Builder;
@@ -14,15 +15,23 @@ namespace CustomerService.Api
 
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.local.json", optional:true)
+                .Build();
         }
         
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IConfiguration>(Configuration);
+            
             ConfigureExtensions(services);
 
             services.AddMvc(options => { options.Filters.Add<ApplicationExceptionFilter>(); });
             services.AddCorrelationId();
+            
+            StartupExtensions.SeedData(services);
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

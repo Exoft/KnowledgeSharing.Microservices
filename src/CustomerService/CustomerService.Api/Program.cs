@@ -15,6 +15,6 @@ namespace CustomerService.Api
             WebHost.CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseStartup<Startup>()
-                .UseUrls("http://localhost:5005");
+                .UseUrls("http://::5000");
     }
 }

@@ -3,7 +3,9 @@ using System.Reflection;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using OrderService.Api.Filters;
 using OrderService.CustomerServiceApi.Interfaces;
 using OrderService.CustomerServiceApi.Services;
@@ -22,12 +24,20 @@ namespace OrderService.Api.Extensions
     {
         public static void ConfigureEventBus(IServiceCollection services)
         {
+            var configuration = services.BuildServiceProvider().GetService<IConfiguration>();
+            
+            var host = configuration.GetValue("RabbitMq:Host", string.Empty);
+            if (!int.TryParse(configuration.GetValue("RabbitMq:Port", string.Empty), out var port))
+            {
+                port = 5672;
+            }
+            
             services.AddSingleton<RabbitMqClient>(s =>
             {
                 var factory = new ConnectionFactory
                 {
-                    HostName = "localhost",
-                    Port = 5672,
+                    HostName = host,
+                    Port = port,
                     UserName = "guest",
                     Password = "guest",
                     VirtualHost = "/",
@@ -37,8 +47,10 @@ namespace OrderService.Api.Extensions
                 
                 var connection = factory.CreateConnection();
                 var channel = connection.CreateModel();
+
+                var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
                 
-                return new RabbitMqClient(connection, channel);
+                return new RabbitMqClient(connection, channel, loggerFactory);
             });
         }
 
@@ -68,15 +80,22 @@ namespace OrderService.Api.Extensions
         
         public static void AddServices(IServiceCollection services)
         {
+            var configuration = services.BuildServiceProvider().GetService<IConfiguration>();
+            var url = configuration.GetValue<string>("CustomerServiceApiUrl");
+            
             services.AddScoped<IOrderRepository, OrderRepository>();
             services.AddScoped<ApplicationExceptionFilter>();
-            services.AddSingleton<ICustomerServiceApiClient, CustomerServiceApiClient>();
+            services.AddSingleton<ICustomerServiceApiClient, CustomerServiceApiClient>(opt =>
+                new CustomerServiceApiClient(url));
         }
 
         public static void ConfigureDb(IServiceCollection services)
         {
-            services.AddEntityFrameworkNpgsql().AddDbContext<ApplicationDbContext>(opt =>
-                opt.UseNpgsql("Host=localhost;Database=order_service;Username=postgres;Password=postgres",
+            var configuration = services.BuildServiceProvider().GetService<IConfiguration>();
+            var connectionString = configuration.GetValue("ConnectionString", string.Empty);
+
+            services.AddDbContext<ApplicationDbContext>(opt =>
+                opt.UseNpgsql(connectionString,
                     b => b.MigrationsAssembly("OrderService.Api")));
 
             var context = services.BuildServiceProvider().GetService<ApplicationDbContext>();

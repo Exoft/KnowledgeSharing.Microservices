@@ -32,7 +32,7 @@ namespace BookingService.Logic.Services
         
         public async Task<Booking> GetAsync(long id)
         {
-            var booking = await _bookingRepository.GetAsync(c => c.Id == id);
+            var booking = await _bookingRepository.GetAsync(id);
             if (booking == null)
                 throw new Exception($"Booking with id {id} does not exist");
 
@@ -56,7 +56,7 @@ namespace BookingService.Logic.Services
 
         public async Task<Booking> UpdateAsync(long id, string startTime, string endTime)
         {
-            var existedBooking = await _bookingRepository.GetAsync(c => c.Id == id);
+            var existedBooking = await _bookingRepository.GetAsync(id);
             if (existedBooking == null)
                 throw new Exception($"Booking with id {id} does not exist");
 
@@ -70,7 +70,7 @@ namespace BookingService.Logic.Services
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var existedBooking = await _bookingRepository.GetAsync(c => c.Id == id);
+            var existedBooking = await _bookingRepository.GetAsync(id);
             if (existedBooking == null)
                 throw new Exception($"Booking with id {id} does not exist");
 

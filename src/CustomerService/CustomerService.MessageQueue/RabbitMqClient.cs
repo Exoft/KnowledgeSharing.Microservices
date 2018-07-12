@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using CustomerService.MessageQueue.Handlers;
 using CustomerService.MessageQueue.Helpers;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -10,16 +11,21 @@ namespace CustomerService.MessageQueue
 {
     public class MessageListener
     {
-        private static IConnection _connection;
-        private static IModel _channel;
+        private readonly IConnection _connection;
+        private readonly IModel _channel;
+        private readonly ILogger _logger;
 
-        public MessageListener(IConnection connection, IModel channel)
+        public MessageListener(
+            IConnection connection,
+            IModel channel,
+            ILoggerFactory loggerFactory)
         {
             _connection = connection;
             _channel = channel;
+            _logger = loggerFactory.CreateLogger(typeof(MessageListener).Name);
         }
 
-        public void Subscribe(string exchange)
+        public void Subscribe(string exchange, IEventHandler eventHandler)
         {
             _channel.ExchangeDeclare(exchange: exchange, 
                 type: ExchangeType.Fanout, 
@@ -32,25 +38,14 @@ namespace CustomerService.MessageQueue
                 routingKey: "");
 
             var consumer = new EventingBasicConsumer(_channel);
-            switch (exchange)
-            {
-                case Constants.MessageQueue.BookingExchange:
-                {
-                    consumer.Received += BookingEventHandler.ConsumerOnReceived;
-                    break;
-                }
-                case Constants.MessageQueue.OrderExchange:
-                {
-                    consumer.Received += OrderEventHandler.ConsumerOnReceived;
-                    break;
-                }
-                default:
-                    throw new Exception("Incorrect exchange name");
-            }
-            
+            consumer.Received += eventHandler.ConsumerOnReceived;
+                        
             _channel.BasicConsume(queue: queueName, 
                 autoAck: true, 
                 consumer: consumer); 
+            
+            _logger.LogInformation($"Consumed to exchange {exchange}");
+            
         }
     }
 }

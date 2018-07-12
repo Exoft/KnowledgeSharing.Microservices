@@ -9,13 +9,11 @@ namespace BookingService.CustomerServiceApi.Services
 {
     public class CustomerServiceApiClient : ICustomerServiceApiClient
     {
-        private const string CustomerServiceApiUrl = "http://localhost:5005";
-        
         private readonly ICustomerServiceApi _client;
 
-        public CustomerServiceApiClient()
+        public CustomerServiceApiClient(string customerServiceApiUrl)
         {
-            _client = RestClient.For<ICustomerServiceApi>(CustomerServiceApiUrl);
+            _client = RestClient.For<ICustomerServiceApi>(customerServiceApiUrl);
         }
         
         public async Task<CustomerResponseModel> GetCustomerByIdAsync(long id, string correlationId)
